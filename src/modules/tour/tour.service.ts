@@ -6,8 +6,79 @@ const createTour = async (tour: ITour): Promise<ITour> => {
   return result;
 }
 
-const getTours = async () => {
-    const result= await Tour.find()
+const getTours = async (query : Record<string,unknown>) => {
+
+  const queryObj ={...query}
+
+  const excludedObj = ['searchTerm', 'page', 'limit', 'sortOrder','sortBy'];
+  excludedObj.forEach((key)=> delete queryObj[key])
+  const searchTerm = query?.searchTerm || '';
+
+  const searchableFields = ['name', 'location', 'startDate', 'endDate'];
+
+    // const result= await Tour.find({
+    //   $or : [{
+    //     name :{
+    //       $regex : searchTerm,
+    //       $option : 'i'
+    //     }
+    //   },{
+    //     location :{
+    //       $regex : searchTerm,
+    //       $option : 'i'
+    //     }
+    //   }, {
+    //     startDate :{
+    //       $regex : searchTerm,
+    //       $option : 'i'
+    //     }
+    //   }, {
+    //     endDate :{
+    //       $regex : searchTerm,
+    //       $option : 'i'
+    //     }
+    //   }]
+    // })
+
+    const searchQuery = Tour.find({
+      $and : [
+        {
+          $or : searchableFields.map((field)=>{
+            return {
+              [field] :{
+                $regex : searchTerm,
+                $option :'i'
+              }
+            }
+          })
+        }
+      ]
+    })
+
+     const fillterQuery = searchQuery.find(queryObj)
+
+
+    const page = Number(query?.page) || 1;
+    const limit = Number(query?.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const paginatedQuery = fillterQuery.skip(skip).limit(limit)
+
+    // sorting
+
+    let sortStr;
+
+    if(query?.sortBy && query?.sortOrder){
+      const sortBy = query?.sortBy;
+     const sortOrder = query?.sortOrder
+
+     sortStr = `${sortOrder === 'desc' ? '-' : ''}${sortBy}`
+    }
+
+    // const sortQuery= await paginatedQuery.sort(sortStr)
+    const sortQuery = paginatedQuery.sort(sortStr)
+
+    let 
 
     return result;
 }

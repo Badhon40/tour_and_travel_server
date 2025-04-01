@@ -3,6 +3,7 @@ import userRouter from './modules/user/user.router'
 import { NextFunction } from 'express';
 import tourRouter from './modules/tour/tour.router';
 import bookingRouter from './modules/booking/booking.router';
+import { globalErrorHandler } from './middlewares/globalErrorHandler';
 
 
 const app=express()
@@ -21,14 +22,14 @@ app.get("/",(req : Request,res: Response)=>{
     })
 })
 
-app.use((err : any,req: Request, res: Response, next: NextFunction) => {
-    
-    res.status(500).json({
-        status: false,  
-        message: err.message,
-        error: err
+app.use(globalErrorHandler)
+
+app.use("*",(req: Request, res: Response)=>{
+    res.status(404).json({
+        status: false,
+        message: `Route not found`
     })
-})
+} )
 
 
 export default app;

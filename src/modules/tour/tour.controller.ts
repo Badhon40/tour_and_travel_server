@@ -25,12 +25,14 @@ const createNewTour = async (req : Request, res : Response) => {
 }
 
 const getAllTours = async (req : Request, res : Response) => {
+
     try {   
-        const tours = await tourService.getTours();
+        const result = await tourService.getTours(req.query)
+        // const tours = await tourService.getTours();
         res.json({
             status: true,
             message: "All Tours",
-            data: tours,
+            data: result,
         });
     }
     catch (error) { 
